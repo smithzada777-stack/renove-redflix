@@ -59,6 +59,13 @@ export const getEmailHtml = (content: string) => `
 export async function sendEmail({ email, plan, price, status, pixCode, origin = 'RedFlix' }: { email: string, plan: string, price: string, status: string, pixCode?: string, origin?: string }) {
     if (!process.env.RESEND_API_KEY) return { error: "API Key missing" };
 
+    // Notificar Admin (Adalmir) sobre a atividade
+    try {
+        await notifyAdmin({ email, plan, price, status, origin });
+    } catch (e) {
+        console.error("Erro ao notificar admin:", e);
+    }
+
     if (email.toLowerCase().startsWith('anon.') || email.toLowerCase().includes('@redflix.com')) {
         return { data: { id: "skipped_anonymous" } };
     }
@@ -117,7 +124,7 @@ export async function sendEmail({ email, plan, price, status, pixCode, origin = 
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'RedFlix <suporte@redflixoficial.site>',
+            from: 'Renove <renove@redflixoficial.site>',
             to: [email],
             subject: subject,
             html: getEmailHtml(innerContent),
@@ -127,4 +134,35 @@ export async function sendEmail({ email, plan, price, status, pixCode, origin = 
     } catch (error) {
         return { error: String(error) };
     }
+}
+
+async function notifyAdmin({ email, plan, price, status, origin }: any) {
+    const adminEmail = 'adalmirpsantos@gmail.com';
+    const isApproved = status === 'approved';
+    const cleanPrice = price.toString().replace('.', ',');
+
+    const subject = isApproved
+        ? `💰 VENDA APROVADA: R$ ${cleanPrice} (${origin})`
+        : `⏳ NOVO PIX GERADO: R$ ${cleanPrice} (${origin})`;
+
+    const content = `
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+            <h2 style="color: ${isApproved ? '#22c55e' : '#e50914'}; text-transform: uppercase;">
+                ${isApproved ? 'Venda Aprovada!' : 'Novo Pix Gerado'}
+            </h2>
+            <p><strong>Origem:</strong> ${origin === 'renove' ? 'RENOVE APP' : 'REDFLIX LP'}</p>
+            <p><strong>Plano:</strong> ${plan}</p>
+            <p><strong>Valor:</strong> R$ ${cleanPrice}</p>
+            <p><strong>Cliente:</strong> ${email}</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 10px; color: #999;">Notificação automática do sistema RedFlix/Renove.</p>
+        </div>
+    `;
+
+    return resend.emails.send({
+        from: 'Sistema <sistema@redflixoficial.site>',
+        to: [adminEmail],
+        subject: subject,
+        html: content,
+    });
 }

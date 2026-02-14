@@ -37,7 +37,7 @@ function RenoveContent() {
   const [step, setStep] = useState<'plans' | 'checkout' | 'pix'>('plans');
   const [selectedPlan, setSelectedPlan] = useState({ months: 1, price: '29,90' });
   const [showAllPlans, setShowAllPlans] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [pixData, setPixData] = useState({ code: '', image: '', id: '' });
   const [isPaid, setIsPaid] = useState(false);
@@ -77,7 +77,7 @@ function RenoveContent() {
 
   const handleGeneratePix = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) return alert("Preencha todos os campos!");
+    if (!formData.email || !formData.phone) return alert("Preencha todos os campos!");
     if (!formData.email.endsWith('@gmail.com')) return alert("Use um e-mail @gmail.com!");
 
     setLoading(true);
@@ -85,7 +85,7 @@ function RenoveContent() {
       // Salva lead com origin 'renove'
       const leadRef = await addDoc(collection(db, "leads"), {
         email: formData.email,
-        password: formData.password, // No Renove pede senha como solicitado
+        phone: formData.phone,
         plan: `${selectedPlan.months} Mês/Meses`,
         price: selectedPlan.price,
         status: 'pending',
@@ -117,6 +117,14 @@ function RenoveContent() {
     const m = Math.floor(s / 60);
     const sec = s % 60;
     return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+
+  const formatPhone = (v: string) => {
+    if (!v) return "";
+    v = v.replace(/\D/g, "");
+    v = v.replace(/(\d{2})(\d)/, "($1) $2");
+    v = v.replace(/(\d{5})(\d)/, "$1-$2");
+    return v.slice(0, 15);
   };
 
   return (
@@ -268,16 +276,16 @@ function RenoveContent() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-2">Sua Senha</label>
+                      <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-2">WhatsApp (DDD + Número)</label>
                       <div className="relative group">
-                        <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" />
+                        <Phone size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" />
                         <input
-                          type="password"
+                          type="tel"
                           required
                           className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
-                          placeholder="Sua senha de acesso"
-                          value={formData.password}
-                          onChange={e => setFormData({ ...formData, password: e.target.value })}
+                          placeholder="(00) 00000-0000"
+                          value={formData.phone}
+                          onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
                         />
                       </div>
                     </div>
