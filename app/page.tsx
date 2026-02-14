@@ -6,7 +6,7 @@ import {
   CheckCircle2, Star, Clock, ShieldCheck,
   Zap, Phone, Mail, QrCode, ArrowLeft,
   Shield, Tv, Film, Headphones, Download, ChevronDown, ChevronUp, Loader2, Copy,
-  Calendar, CreditCard, Lock
+  ChevronRight, Calendar, CreditCard, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
