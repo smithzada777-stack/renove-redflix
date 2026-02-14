@@ -39,23 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# netlify
-.netlify
-
-# firebase
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
-.firebase/
-*firebase*adminsdk*.json
-
-# arquivos de teste/debug
-debug-*.js
-test-*.js
-*.ps1
-
-# arquivos com credenciais (NÃO COMMITAR)
-VERCEL-ENV-VARS.txt
-VARIAVEIS-VERCEL.md
-.env.vercel
