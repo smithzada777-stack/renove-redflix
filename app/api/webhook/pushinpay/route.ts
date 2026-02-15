@@ -9,7 +9,6 @@ export async function POST(req: Request) {
         const contentType = req.headers.get('content-type') || '';
         let data: any;
 
-        // Parse inteligente para suportar múltiplos formatos (JSON ou Form UrlEncoded)
         if (contentType.includes('application/json')) {
             try {
                 data = JSON.parse(bodyText);
@@ -21,9 +20,16 @@ export async function POST(req: Request) {
         }
 
         console.log('--- [WEBHOOK PUSHINPAY] RECEBIDO ---');
+        console.log('Payload:', JSON.stringify(data, null, 2));
 
         const transactionId = (data.id || data.transaction_id || data.reference || data.external_id || data.reference_id)?.toString().toLowerCase();
-        const status = (data.status || data.transaction_status || '').toString().toLowerCase();
+        let status = (data.status || data.transaction_status || '').toString().toLowerCase();
+
+        // PushinPay Status Mapping (Garantindo que 'paid' ou 'approved' sejam detectados)
+        if (status === '1' || status === 'paid' || status === 'concluido' || status === 'approved') {
+            status = 'approved';
+        }
+
         const rawPayerEmail = data.payer_email || data.email || data.payer?.email;
         const payerEmail = rawPayerEmail?.toLowerCase().trim();
 
@@ -32,101 +38,69 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'ID not found' }, { status: 200 });
         }
 
-        console.log(`[WEBHOOK] ID: ${transactionId} | Status: ${status}`);
+        console.log(`[WEBHOOK] Processando ID: ${transactionId} | Status Final: ${status}`);
 
-        // 1. Atualiza a coleção de pagamentos
-        try {
-            if (adminDb) {
-                await adminDb.collection('payments').doc(transactionId).set({
-                    status: status,
-                    updated_at: new Date().toISOString(),
-                    webhook_payload: data
-                }, { merge: true });
-            }
-        } catch (dbError) {
-            console.error('[WEBHOOK] Erro ao atualizar payments:', dbError);
-        }
+        if (adminDb) {
+            // 1. Atualizar coleção de pagamentos (para o onSnapshot da tela do cliente)
+            await adminDb.collection('payments').doc(transactionId).set({
+                status: status,
+                updated_at: new Date().toISOString(),
+                webhook_payload: data
+            }, { merge: true });
+            console.log(`[WEBHOOK] Pagamento ${transactionId} atualizado para ${status} no Firestore.`);
 
-        // 2. Se o status for positivo, atualiza o Lead e envia o e-mail de acesso
-        const positiveStatuses = ['paid', 'approved', 'confirmed', 'concluido', 'sucesso'];
-        if (positiveStatuses.includes(status)) {
-            console.log(`[WEBHOOK] Pagamento confirmado para ID: ${transactionId}. Iniciando liberação...`);
+            // 2. Liberar acesso se aprovado
+            const positiveStatuses = ['paid', 'approved', 'confirmed', 'concluido', 'sucesso'];
+            if (positiveStatuses.includes(status)) {
+                console.log(`[WEBHOOK] Pagamento CONFIRMADO. Buscando lead...`);
 
-            if (adminDb) {
                 const leadsRef = adminDb.collection('leads');
-                const snapshot = await leadsRef.where('transactionId', '==', transactionId).get();
+                // Tenta buscar por transactionId OU por e-mail (fallback)
+                let leadDoc: any = null;
 
-                if (!snapshot.empty) {
-                    for (const doc of snapshot.docs) {
-                        const leadData = doc.data();
-
-                        try {
-                            const newStatus = leadData.isRenewal ? 'renewed' : 'approved';
-                            // Primeiro garante a atualização no Banco (Dashboard)
-                            await doc.ref.update({
-                                status: newStatus,
-                                paidAt: new Date().toISOString()
-                            });
-                            console.log(`[WEBHOOK] Lead ${doc.id} ATUALIZADO PARA ${newStatus.toUpperCase()} no banco.`);
-                        } catch (dbErr: any) {
-                            console.error(`[WEBHOOK] Erro ao atualizar lead no banco: ${dbErr.message}`);
-                        }
-
-                        // Depois tenta enviar o e-mail (isolado)
-                        if (leadData.email) {
-                            try {
-                                await sendEmail({
-                                    email: leadData.email,
-                                    plan: leadData.plan || 'Plano RedFlix',
-                                    price: leadData.price || '0,00',
-                                    status: 'approved',
-                                    origin: leadData.origin || 'renove'
-                                });
-                                console.log(`[WEBHOOK] E-mail de aprovação enviado com sucesso para ${leadData.email}`);
-                            } catch (emailErr: any) {
-                                console.error(`[WEBHOOK] FALHA NO E-MAIL (Mas Dashboard foi atualizado): ${emailErr.message}`);
-                            }
-                        }
-                    }
+                const snapId = await leadsRef.where('transactionId', '==', transactionId).limit(1).get();
+                if (!snapId.empty) {
+                    leadDoc = snapId.docs[0];
+                    console.log(`[WEBHOOK] Lead encontrado por ID de transação: ${leadDoc.id}`);
                 } else if (payerEmail) {
-                    // FALLBACK: Tenta por e-mail se não achou por ID de transação diretamente
-                    console.log(`[WEBHOOK] Tentando fallback por e-mail: ${payerEmail}`);
-
-                    // Busca sem filtro de status primeiro para conferir se o lead existe
-                    const snapEmail = await leadsRef.where('email', 'in', [payerEmail, payerEmail.toLowerCase()]).get();
-
+                    const snapEmail = await leadsRef.where('email', '==', payerEmail).orderBy('createdAt', 'desc').limit(1).get();
                     if (!snapEmail.empty) {
-                        // Pega o lead mais recente que esteja pendente
-                        const doc = snapEmail.docs.find((d: any) => ['pending', 'pending_payment'].includes(d.data().status)) || snapEmail.docs[0];
-                        const leadData = doc.data();
-
-                        try {
-                            const newStatus = leadData.isRenewal ? 'renewed' : 'approved';
-                            await doc.ref.update({
-                                status: newStatus,
-                                transactionId: transactionId,
-                                paidAt: new Date().toISOString()
-                            });
-                            console.log(`[WEBHOOK] Lead ${doc.id} aprovado via Fallback de E-mail.`);
-
-                            await sendEmail({
-                                email: payerEmail,
-                                plan: leadData.plan || 'Plano RedFlix',
-                                price: leadData.price || '0,00',
-                                status: 'approved',
-                                origin: leadData.origin || 'renove'
-                            });
-                        } catch (err: any) {
-                            console.error(`[WEBHOOK] Erro no fluxo de fallback: ${err.message}`);
-                        }
-                    } else {
-                        console.error(`[WEBHOOK] ERRO CRÍTICO: Nenhum lead encontrado para o e-mail ${payerEmail} ou transação ${transactionId}. O pagamento foi recebido mas não pôde ser vinculado a um cliente.`);
+                        leadDoc = snapEmail.docs[0];
+                        console.log(`[WEBHOOK] Lead encontrado por E-mail (Fallback): ${leadDoc.id}`);
                     }
+                }
+
+                if (leadDoc) {
+                    const leadData = leadDoc.data();
+                    const newStatus = leadData.origin === 'renove' || leadData.isRenewal ? 'renewed' : 'approved';
+
+                    await leadDoc.ref.update({
+                        status: newStatus,
+                        paidAt: new Date().toISOString(),
+                        transactionId: transactionId // garante o vinculo
+                    });
+                    console.log(`[WEBHOOK] Lead ${leadDoc.id} ATUALIZADO para ${newStatus.toUpperCase()}.`);
+
+                    // 3. Enviar E-mail
+                    try {
+                        await sendEmail({
+                            email: leadData.email || payerEmail,
+                            plan: leadData.plan || 'Plano RedFlix',
+                            price: leadData.price || '0,00',
+                            status: 'approved',
+                            origin: leadData.origin || 'renove'
+                        });
+                        console.log(`[WEBHOOK] E-mail enviado para ${leadData.email || payerEmail}`);
+                    } catch (err: any) {
+                        console.error('[WEBHOOK] Erro no envio de e-mail:', err.message);
+                    }
+                } else {
+                    console.error(`[WEBHOOK] Lead não encontrado para ID ${transactionId} nem E-mail ${payerEmail}`);
                 }
             }
         }
 
-        return NextResponse.json({ success: true, message: 'Webhook processed' }, { status: 200 });
+        return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (error: any) {
         console.error('--- [WEBHOOK] ERRO CRÍTICO ---', error.message);

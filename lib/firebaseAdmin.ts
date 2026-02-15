@@ -6,53 +6,42 @@ function initializeAdmin() {
 
     try {
         const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-        let credentials;
+        if (!serviceAccount) {
+            console.warn('[FIREBASE ADMIN] Variável FIREBASE_SERVICE_ACCOUNT não encontrada.');
+            return null;
+        }
 
-        // Fallback robusto para parse de JSON (comum dar erro em Vercel/Netlify)
-        if (serviceAccount) {
-            const tryParse = (str: string) => {
-                try {
-                    let parsed = JSON.parse(str);
-                    if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-                    return parsed;
-                } catch (e) {
-                    return null;
-                }
-            };
-
-            credentials = tryParse(serviceAccount);
-
-            if (!credentials) {
-                const flattened = serviceAccount.replace(/\n/g, '').replace(/\r/g, '').trim();
-                credentials = tryParse(flattened);
-            }
-
-            if (!credentials) {
+        let credentials: any;
+        try {
+            // Tenta parse direto
+            credentials = JSON.parse(serviceAccount);
+        } catch (e) {
+            try {
+                // Tenta limpar possíveis aspas extras (comum em .env)
                 let clean = serviceAccount.trim();
-                if (clean.startsWith('"') && clean.endsWith('"')) clean = clean.slice(1, -1);
-                if (clean.startsWith("'") && clean.endsWith("'")) clean = clean.slice(1, -1);
-                credentials = tryParse(clean);
+                if (clean.startsWith("'") || clean.startsWith('"')) clean = clean.slice(1, -1);
+                credentials = JSON.parse(clean);
+            } catch (e2) {
+                console.error('[FIREBASE ADMIN] Erro ao processar JSON das credenciais.');
+                return null;
             }
         }
 
-        if (credentials) {
-            if (credentials.private_key) {
-                credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
-                console.log('[FIREBASE ADMIN] Inicializado com sucesso.');
-                return admin.initializeApp({
-                    credential: admin.credential.cert(credentials)
-                });
-            } else {
-                console.error('[FIREBASE ADMIN] Credenciais sem "private_key". Chaves:', Object.keys(credentials).join(', '));
-            }
-        } else {
-            console.warn('[FIREBASE ADMIN] Nenhuma credencial encontrada.');
+        if (credentials && credentials.private_key) {
+            // Corrige quebras de linha que o .env pode ter escapado
+            credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+
+            console.log('[FIREBASE ADMIN] Inicializado com sucesso para projeto:', credentials.project_id);
+            return admin.initializeApp({
+                credential: admin.credential.cert(credentials)
+            });
         }
 
+        console.error('[FIREBASE ADMIN] private_key não encontrada no JSON. Chaves presentes:', Object.keys(credentials || {}).join(', '));
         return null;
 
     } catch (error: any) {
-        console.error('[FIREBASE ADMIN] Erro fatal:', error.message);
+        console.error('[FIREBASE ADMIN] Erro fatal na inicialização:', error.message);
         return null;
     }
 }
