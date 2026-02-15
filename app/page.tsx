@@ -147,22 +147,21 @@ export default function RenovePage() {
   };
 
   const mainPlans = [
-    { months: 1, price: '29,90', oldPrice: '39,90', highlight: false, users: 125 + realSales },
-    { months: 3, price: '79,90', oldPrice: '89,70', highlight: true, users: 840 + realSales },
-    { months: 6, price: '149,90', oldPrice: '179,40', highlight: false, users: 420 + realSales },
+    { months: 1, price: '29,90', oldPrice: '39,90', highlight: false, users: 500, desc: 'Plano normal (sem desconto)' },
+    { months: 3, price: '79,90', oldPrice: '89,70', highlight: true, users: 2000, desc: 'Economize 11%', bonus: ['3 Telas Simultâneas', 'Suporte VIP 24h', 'Sem Travamentos'] },
+    { months: 6, price: '149,90', oldPrice: '179,40', highlight: false, users: 250, desc: 'Economize 16%' },
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-primary/30 font-sans">
+    <div className="min-h-screen bg-black text-white selection:bg-red-600/30 font-sans">
       {/* Header */}
       <nav className="border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Logo />
-          <div className="hidden md:flex items-center gap-8">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Renovação Imediata</span>
-            <div className="flex items-center gap-2 bg-green-500/10 text-green-500 px-4 py-2 rounded-full border border-green-500/20">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Sistema Online</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-red-600/10 text-red-600 px-4 py-2 rounded-full border border-red-600/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Atendimento Ativo</span>
             </div>
           </div>
         </div>
@@ -180,81 +179,82 @@ export default function RenovePage() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-16"
             >
-              <div className="text-center space-y-6 max-w-3xl mx-auto">
-                <motion.div
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                  className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-4"
-                >
-                  Área de Renovação
-                </motion.div>
-                <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter uppercase leading-none text-primary">
-                  Assine Renove:
+              <div className="text-center space-y-6 max-w-3xl mx-auto px-4">
+                <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter uppercase leading-[0.9] text-white">
+                  <span className="text-red-600">RENOVE</span> ou <span className="text-red-600">ATIVE</span> <br /> seu plano:
                 </h1>
-                <p className="text-gray-500 text-sm md:text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                  Não perca seu acesso! Renove agora e continue aproveitando todo o catálogo em 4K sem interrupções.
+                <p className="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-[0.2em] max-w-xl mx-auto leading-relaxed">
+                  Escolha o período ideal e garanta seu acesso imediato
                 </p>
               </div>
 
               {/* Grid de Planos Principais */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto perspective-1000">
                 {mainPlans.map((p, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className={`group relative rounded-[3rem] p-8 md:p-10 border transition-all duration-500 ${p.highlight
-                      ? 'bg-[#121212] border-primary/50 shadow-[0_30px_100px_rgba(229,9,20,0.2)] scale-105 z-10'
-                      : 'bg-[#0a0a0a] border-white/10 hover:border-white/20'
+                    className={`group relative rounded-[2.5rem] p-8 md:p-10 transition-all duration-500 flex flex-col justify-between overflow-hidden ${p.highlight
+                      ? 'bg-[#0a0a0a] border-2 border-red-600 shadow-[0_0_80px_rgba(229,9,20,0.15)] scale-105 z-10'
+                      : 'bg-[#0a0a0a] border border-white/5 hover:border-white/20'
                       }`}
                   >
                     {p.highlight && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-xl z-20 flex items-center gap-2">
-                        <Zap size={14} fill="white" /> MAIS POPULAR
+                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-8 py-2.5 rounded-b-2xl uppercase tracking-widest shadow-xl z-20 flex items-center gap-2">
+                        <Zap size={14} fill="white" /> MAIS VENDIDO
                       </div>
                     )}
 
-                    <div className="text-center space-y-6 mb-8">
-                      <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] ${p.highlight ? 'text-primary' : 'text-gray-500'}`}>
-                        Plano {p.months} {p.months === 1 ? 'Mês' : 'Meses'}
+                    <div className="text-center space-y-6 relative z-10">
+                      <h3 className="text-4xl font-black italic uppercase tracking-tighter text-white">
+                        {p.months} {p.months === 1 ? 'Mês' : 'Meses'}
                       </h3>
+
                       <div className="space-y-1">
-                        <span className="text-gray-600 line-through text-lg font-bold">R$ {p.oldPrice}</span>
+                        <span className="text-gray-600 line-through text-sm font-bold">R$ {p.oldPrice}</span>
                         <div className="flex items-center justify-center gap-1">
-                          <span className="text-2xl font-black text-primary/50 italic">R$</span>
-                          <span className="text-6xl md:text-7xl font-black italic tracking-tighter drop-shadow-[0_0_20px_rgba(229,9,20,0.3)]">
-                            {p.price}
+                          <span className="text-4xl md:text-6xl font-black italic tracking-tighter text-white group-hover:text-red-600 transition-colors">
+                            <span className={p.highlight ? 'text-red-600' : ''}>R$ {p.price}</span>
                           </span>
                         </div>
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${p.desc.includes('Economize') ? 'text-green-500' : 'text-gray-500'}`}>
+                          {p.desc.includes('Economize') ? `✓ ${p.desc}` : p.desc}
+                        </p>
                       </div>
-                    </div>
 
-                    <div className="space-y-4 mb-10">
-                      {bonuses.slice(0, 4).map((b, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <CheckCircle2 size={12} className="text-primary" />
-                          </div>
-                          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">{b.title}</span>
+                      <div className="flex items-center justify-center gap-2 py-4">
+                        <div className="flex -space-x-2">
+                          {[1, 2, 3].map(u => (
+                            <div key={u} className="w-5 h-5 rounded-full bg-gray-800 border-2 border-black flex items-center justify-center">
+                              <Users size={8} className="text-red-600" />
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{p.users.toLocaleString()} pessoas assinaram este plano</span>
+                      </div>
+
+                      {p.bonus && (
+                        <div className="space-y-3 py-4 border-t border-white/5">
+                          {p.bonus.map((b, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                              <CheckCircle2 size={12} className="text-red-600" /> {b}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <button
                       onClick={() => handlePlanSelect(p.months)}
-                      className={`w-full h-16 rounded-2xl font-black italic tracking-tighter text-xl flex items-center justify-center gap-2 transition-all ${p.highlight
-                        ? 'bg-primary text-white shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-95'
+                      className={`w-full h-16 mt-8 rounded-2xl font-black italic tracking-tighter text-xl flex items-center justify-center gap-2 transition-all relative z-10 ${p.highlight
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 hover:scale-[1.05]'
                         : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
                         }`}
                     >
-                      RENOVAR AGORA <ChevronRight size={20} />
+                      {p.highlight && <Zap size={20} fill="white" />} Selecionar Plano
                     </button>
-
-                    <div className="mt-6 flex items-center justify-center gap-2 text-gray-600">
-                      <Users size={14} />
-                      <span className="text-[10px] font-black uppercase">+{p.users.toLocaleString()} Ativos</span>
-                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -263,27 +263,14 @@ export default function RenovePage() {
               <div className="text-center pt-8">
                 <button
                   onClick={() => setShowAllPlans(true)}
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group"
+                  className="inline-flex items-center gap-4 px-10 py-5 rounded-2xl bg-white/5 border border-white/10 hover:border-red-600/50 transition-all group shadow-2xl"
                 >
-                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 group-hover:text-white">Ver Todos os Planos</span>
-                  <ChevronDown className="text-primary group-hover:translate-y-1 transition-transform" />
+                  <Calendar className="text-red-600 group-hover:scale-110 transition-transform" size={20} />
+                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 group-hover:text-white">Explorar Outros Períodos</span>
+                  <ChevronRight size={18} className="text-red-600 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
 
-              {/* Bônus Adicionais Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto pt-20">
-                {bonuses.map((b, i) => (
-                  <div key={i} className="bg-[#050505] border border-white/5 p-6 rounded-[2rem] flex flex-col items-center text-center space-y-4 hover:border-primary/20 transition-all">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                      <b.icon size={24} />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-[11px] font-black uppercase text-white tracking-tight">{b.title}</h4>
-                      <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{b.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </motion.div>
           )}
 
@@ -295,55 +282,59 @@ export default function RenovePage() {
               animate={{ opacity: 1, scale: 1 }}
               className="max-w-xl mx-auto"
             >
-              <div className="bg-[#0f0f0f] border-2 border-primary/20 rounded-[3.5rem] p-10 md:p-14 shadow-2xl relative overflow-hidden">
+              <div className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-10 md:p-14 shadow-2xl relative overflow-hidden">
                 <button
                   onClick={() => setStep('plans')}
-                  className="absolute left-8 top-8 text-gray-500 hover:text-primary transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                  className="absolute left-8 top-8 group text-gray-500 hover:text-red-600 transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
                 >
-                  <ArrowLeft size={16} /> Voltar
+                  <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Voltar
                 </button>
 
                 <div className="text-center space-y-10 mt-6">
-                  <div className="space-y-2">
-                    <h2 className="text-4xl font-black italic tracking-tighter uppercase">Quase lá!</h2>
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.3em]">Confirme seus dados de acesso</p>
+                  <div className="space-y-4">
+                    <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Checkout <span className="text-red-600">Seguro</span></h2>
+                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.3em]">Seu acesso será enviado via e-mail</p>
                   </div>
 
-                  <div className="bg-black/50 border border-white/5 rounded-3xl p-6 flex items-center justify-between shadow-inner">
+                  <div className="bg-black border border-white/5 rounded-3xl p-6 flex items-center justify-between shadow-inner">
                     <div className="text-left">
-                      <span className="text-[10px] text-primary font-black uppercase tracking-widest">Plano Selecionado</span>
+                      <span className="text-[9px] text-red-600 font-black uppercase tracking-widest">Plano Selecionado</span>
                       <h3 className="text-xl font-black italic text-white uppercase">{selectedPlan.months} Mês/Meses</h3>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-600 font-black uppercase tracking-widest leading-none">Total</span>
+                      <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest leading-none">Total</span>
                       <p className="text-3xl font-black text-white italic">R$ {selectedPlan.price}</p>
                     </div>
                   </div>
 
-                  <form className="space-y-6" onSubmit={handleGeneratePix}>
+                  <form className="space-y-8" onSubmit={handleGeneratePix}>
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-2 block text-left">Seu Melhor E-mail (@gmail.com)</label>
+                      <div className="space-y-3">
+                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-4 block text-left">E-mail para Receber Acesso (@gmail.com)</label>
                         <div className="relative group">
-                          <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" />
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-14 flex justify-center">
+                            <Mail size={18} className="text-gray-600 group-focus-within:text-red-600 transition-colors" />
+                          </div>
                           <input
                             type="email"
                             required
-                            className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
+                            className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm focus:outline-none focus:border-red-600 transition-all shadow-inner text-white font-bold"
                             placeholder="exemplo@gmail.com"
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                           />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-2 block text-left">WhatsApp (DDD + Número)</label>
+                      <div className="space-y-3">
+                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-4 block text-left">WhatsApp de Suporte</label>
                         <div className="relative group">
-                          <Phone size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" />
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-14 flex justify-center">
+                            <Phone size={18} className="text-gray-600 group-focus-within:text-red-600 transition-colors" />
+                          </div>
                           <input
                             type="tel"
                             required
-                            className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
+                            className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm focus:outline-none focus:border-red-600 transition-all shadow-inner text-white font-bold"
                             placeholder="(00) 00000-0000"
                             value={formData.phone}
                             onChange={e => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
@@ -355,14 +346,19 @@ export default function RenovePage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-primary hover:bg-primary-hover h-20 rounded-2xl font-black italic tracking-tighter text-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-xl shadow-primary/20 hover:scale-[1.02]"
+                      className="w-full bg-red-600 hover:bg-red-700 h-20 rounded-2xl font-black italic tracking-tighter text-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-xl shadow-red-600/20 hover:scale-[1.02] active:scale-95"
                     >
-                      {loading ? <Loader2 className="animate-spin" /> : <>GERAR PAGAMENTO <ChevronRight /></>}
+                      {loading ? <Loader2 className="animate-spin" /> : <>GERAR CÓDIGO PIX <ChevronRight /></>}
                     </button>
 
-                    <div className="flex items-center justify-center gap-6 opacity-40">
-                      <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest"><Shield size={12} /> 100% Seguro</div>
-                      <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest"><QrCode size={12} /> Pix Imediato</div>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-6 bg-white/[0.02] rounded-3xl border border-white/5">
+                      <div className="flex items-center gap-4">
+                        <img src="https://i.imgur.com/vHq83T4.png" alt="Pix" className="w-12 h-12 rounded-xl object-contain bg-white p-2" />
+                        <div className="text-left">
+                          <p className="text-[10px] font-black text-white uppercase tracking-widest">Pagamento Seguro</p>
+                          <p className="text-[9px] text-gray-500 font-bold uppercase tracking-tight leading-tight">Sua transação é criptografada e verificada</p>
+                        </div>
+                      </div>
                     </div>
                   </form>
                 </div>
@@ -378,71 +374,101 @@ export default function RenovePage() {
               animate={{ opacity: 1, scale: 1 }}
               className="max-w-xl mx-auto"
             >
-              <div className="bg-[#0f0f0f] border-2 border-primary/20 rounded-[3.5rem] overflow-hidden shadow-2xl relative">
-                <div className="bg-primary/10 p-10 text-center border-b border-primary/20">
-                  <h2 className="text-3xl font-black italic tracking-tight uppercase mb-2">Quase Pronto!</h2>
-                  <p className="text-xs font-bold text-primary uppercase tracking-[0.3em] animate-pulse">Aguardando seu pagamento...</p>
-                </div>
-
-                <div className="p-10 space-y-8">
-                  <div className="flex flex-col items-center gap-6">
-                    <div className="text-center space-y-1">
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Tempo para pagar:</p>
-                      <p className="text-4xl font-black italic tracking-tighter text-white">{formatTime(timeLeft)}</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-[2.5rem] shadow-2xl relative group">
-                      <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-all opacity-50" />
-                      <img src={pixData.image} alt="QR Code" className="w-56 h-56 relative z-10" />
-                    </div>
-
-                    <div className="w-full space-y-4">
-                      <div className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] font-mono text-gray-500 break-all text-center">
-                        {pixData.code}
-                      </div>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(pixData.code);
-                          alert("Código copiado!");
-                        }}
-                        className="w-full bg-white text-black h-16 rounded-2xl font-black uppercase text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
-                      >
-                        <Copy size={18} /> COPIAR CÓDIGO PIX
-                      </button>
-                    </div>
+              {isPaid ? (
+                <div className="bg-[#0a0a0a] border-2 border-green-500/50 rounded-[3.5rem] p-10 md:p-14 text-center space-y-8 shadow-[0_0_100px_rgba(34,197,94,0.1)]">
+                  <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border-2 border-green-500/20">
+                    <CheckCircle2 size={48} className="text-green-500" />
+                  </div>
+                  <div className="space-y-4">
+                    <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none">PAGAMENTO <br /><span className="text-green-500 text-6xl">APROVADO!</span></h2>
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">Seu acesso foi liberado com prioridade máxima</p>
                   </div>
 
-                  <div className="pt-6 border-t border-white/5 space-y-4">
-                    <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-2xl border border-primary/10">
-                      <Mail className="text-primary shrink-0" size={20} />
-                      <div className="text-left">
-                        <p className="text-[10px] text-primary/60 font-black uppercase tracking-widest">Enviando acesso para:</p>
-                        <p className="text-xs font-black text-white">{formData.email}</p>
+                  <div className="bg-black/50 border border-white/5 rounded-3xl p-8 space-y-6 text-left shadow-inner">
+                    <p className="text-red-500 font-black uppercase text-xs tracking-widest border-b border-red-500/10 pb-4">Instruções para Resgate:</p>
+                    <ul className="space-y-4">
+                      {[
+                        'Verifique sua caixa de entrada e SPAM agora mesmo.',
+                        'Caso o e-mail atrase, clique no botão para falar no WhatsApp.',
+                        'Tenha seu e-mail em mãos para agilizar o suporte.'
+                      ].map((text, idx) => (
+                        <li key={idx} className="flex gap-4">
+                          <span className="w-6 h-6 rounded-lg bg-red-600/20 text-red-600 flex items-center justify-center shrink-0 font-black text-xs">{idx + 1}</span>
+                          <span className="text-xs font-bold text-gray-300 uppercase tracking-tight leading-relaxed">{text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <a
+                    href="https://wa.me/5571991644164"
+                    target="_blank"
+                    className="w-full bg-green-600 hover:bg-green-700 h-20 rounded-2xl font-black italic tracking-tighter text-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-green-600/20"
+                  >
+                    FALAR NO WHATSAPP <ChevronRight />
+                  </a>
+                </div>
+              ) : (
+                <div className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative">
+                  <div className="bg-red-600/5 p-10 text-center border-b border-white/10">
+                    <h2 className="text-3xl font-black italic tracking-tight uppercase mb-2">Quase Pronto!</h2>
+                    <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] animate-pulse">Aguardando Confirmação Bancária...</p>
+                  </div>
+
+                  <div className="p-10 space-y-10">
+                    <div className="flex flex-col items-center gap-8">
+                      <div className="text-center space-y-1">
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">Expira em:</p>
+                        <p className="text-4xl font-black italic tracking-tighter text-white">{formatTime(timeLeft)}</p>
                       </div>
-                    </div>
-                    {isPaid && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-green-500 text-white p-6 rounded-2xl text-center shadow-lg shadow-green-500/30"
-                      >
-                        <div className="flex items-center justify-center gap-3">
-                          <CheckCircle2 size={24} />
-                          <span className="font-black italic text-xl uppercase tracking-tighter">PAGAMENTO APROVADO!</span>
+
+                      <div className="bg-white p-6 rounded-[2.5rem] shadow-[0_0_50px_rgba(255,255,255,0.05)] relative group">
+                        <div className="absolute inset-0 bg-red-600/10 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-all opacity-50" />
+                        <img src={pixData.image} alt="QR Code" className="w-56 h-56 relative z-10" />
+                      </div>
+
+                      <div className="w-full space-y-4">
+                        <div className="bg-black border border-white/10 rounded-2xl p-6 text-[11px] font-mono text-gray-500 break-all text-center select-all cursor-pointer hover:border-red-600/50 transition-colors" onClick={() => { navigator.clipboard.writeText(pixData.code); alert("Código copiado!"); }}>
+                          {pixData.code}
                         </div>
-                        <p className="text-xs font-bold mt-1 opacity-90 uppercase">Verifique seu e-mail agora mesmo.</p>
-                      </motion.div>
-                    )}
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(pixData.code);
+                            alert("Código copiado!");
+                          }}
+                          className="w-full bg-red-600 text-white h-18 py-5 rounded-2xl font-black italic tracking-tighter text-xl flex items-center justify-center gap-3 hover:bg-red-700 transition-all shadow-xl shadow-red-600/20"
+                        >
+                          <Copy size={20} /> COPIAR CÓDIGO PIX
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-white/5 space-y-6">
+                      <div className="flex items-center gap-4 bg-white/[0.02] p-6 rounded-2xl border border-white/10">
+                        <div className="w-10 h-10 rounded-xl bg-red-600/20 flex items-center justify-center text-red-600">
+                          <Mail size={20} />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Verifique seu e-mail após pagar:</p>
+                          <p className="text-xs font-black text-white italic">{formData.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-4 opacity-40">
+                        <Shield size={14} />
+                        <span className="text-[9px] font-black uppercase tracking-widest">Ambiente 100% Blindado</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           )}
 
         </AnimatePresence>
       </main>
 
-      {/* MODAL: TODOS OS PLANOS (GLASSMORPHISM) */}
+      {/* MODAL: TODOS OS PLANOS (RED THEME) */}
       <AnimatePresence>
         {showAllPlans && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
@@ -451,85 +477,74 @@ export default function RenovePage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowAllPlans(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-black/95 backdrop-blur-xl"
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-6xl max-h-[90vh] glass rounded-[3.5rem] overflow-hidden flex flex-col shadow-[0_0_100px_rgba(229,9,20,0.1)] border border-white/10"
+              exit={{ opacity: 0, scale: 0.95, y: 30 }}
+              className="relative w-full max-w-5xl max-h-[85vh] bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden flex flex-col shadow-[0_0_120px_rgba(229,9,20,0.1)] border border-white/10"
             >
               {/* Header Modal */}
-              <div className="p-8 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-3xl">
-                <div className="flex-1">
+              <div className="p-8 md:p-10 border-b border-white/5 flex justify-between items-center bg-black/40">
+                <div className="flex-1 text-left">
                   <h2 className="text-3xl font-black italic tracking-tighter uppercase text-white leading-none">
-                    Todos os <span className="text-primary">Planos:</span>
+                    Mais <span className="text-red-600">Opções</span> de Período
                   </h2>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-2 leading-relaxed">
-                    Escolha o período ideal. Quanto <span className="text-primary">maior o plano</span>, maior o seu <span className="text-white">desconto exclusivo</span> na renovação.
-                  </p>
+                  <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.4em] mt-3">Quanto maior o plano, menor o valor mensal</p>
                 </div>
                 <button
                   onClick={() => setShowAllPlans(false)}
-                  className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all border border-white/10 ml-4 shrink-0"
+                  className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:bg-red-600 transition-all border border-white/5 ml-4 shrink-0"
                 >
                   <X size={24} />
                 </button>
               </div>
 
               {/* Scroll Area */}
-              <div className="p-4 md:p-12 overflow-y-auto scrollbar-hide">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => {
+              <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                  {[1, 2, 3, 4, 5, 6, 9, 12].map((m) => {
                     const price = getPlanPrice(m);
                     const perMonth = (parseFloat(price.replace(',', '.')) / m).toFixed(2).replace('.', ',');
-                    const isYearly = m === 12;
+                    const isSelected = selectedPlan.months === m;
 
                     return (
                       <div
                         key={m}
-                        className={`group relative bg-black/40 border border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-black/60 hover:border-primary/30 flex flex-col justify-between h-full ${isYearly ? 'ring-2 ring-primary/40' : ''}`}
+                        className={`group relative bg-black border border-white/5 rounded-[2rem] p-6 transition-all hover:border-red-600/50 flex flex-col justify-between h-full ${isSelected ? 'border-red-600 ring-1 ring-red-600/20' : ''}`}
                       >
-                        {isYearly && (
-                          <div className="absolute -top-3 right-8 bg-primary text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Melhor Valor</div>
-                        )}
-                        <div className="space-y-6">
+                        <div className="space-y-6 text-left">
                           <div className="flex justify-between items-start">
-                            <h3 className="text-2xl font-black italic text-white uppercase leading-none">{m} {m === 1 ? 'Mês' : 'Meses'}</h3>
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                              <Calendar size={18} />
-                            </div>
+                            <h3 className="text-xl font-black italic text-white uppercase leading-none">{m} {m === 1 ? 'Mês' : 'Meses'}</h3>
+                            <Calendar size={16} className="text-red-600" />
                           </div>
 
                           <div className="space-y-1">
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-lg font-black text-primary/50 italic">R$</span>
-                              <span className="text-4xl font-black italic tracking-tighter text-white">{price}</span>
-                            </div>
-                            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">R$ {perMonth} por mês</p>
+                            <p className="text-3xl font-black italic tracking-tighter text-white group-hover:text-red-600 transition-colors">R$ {price}</p>
+                            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">R$ {perMonth} mensal</p>
                           </div>
 
-                          <div className="space-y-2 pt-4">
-                            <ul className="space-y-2">
-                              <li className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                                <Zap size={10} className="text-primary" /> Acesso Imediato
-                              </li>
-                              <li className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                                <Tv size={10} className="text-primary" /> 4K Ultra HD
-                              </li>
-                              <li className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                                <Users size={10} className="text-primary" /> 3 Telas
-                              </li>
-                            </ul>
+                          <div className="pt-2">
+                            <div className="h-px bg-white/5 w-full" />
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 uppercase tracking-tight">
+                              <CheckCircle2 size={10} className="text-red-600" /> Ativação em Segundos
+                            </div>
+                            <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 uppercase tracking-tight">
+                              <CheckCircle2 size={10} className="text-red-600" /> Suporte Premium
+                            </div>
                           </div>
                         </div>
 
                         <button
                           onClick={() => handlePlanSelect(m)}
-                          className="mt-6 w-full h-12 md:h-14 rounded-xl bg-white/5 text-white font-black uppercase text-[10px] border border-white/10 group-hover:bg-primary group-hover:border-primary transition-all flex items-center justify-center gap-2"
+                          className={`mt-6 w-full h-12 rounded-xl text-white font-black uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 ${isSelected ? 'bg-red-600' : 'bg-white/5 border border-white/10 group-hover:bg-red-600/10'}`}
                         >
-                          Selecionar <ChevronRight size={14} />
+                          {isSelected ? 'Sua Escolha' : 'Selecionar'} <ChevronRight size={14} />
                         </button>
                       </div>
                     );
@@ -538,10 +553,11 @@ export default function RenovePage() {
               </div>
 
               {/* Footer Modal */}
-              <div className="p-8 border-t border-white/10 bg-black/40 backdrop-blur-3xl text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">
-                  *A renovação é válida imediatamente após a confirmação do pagamento.
-                </p>
+              <div className="p-8 border-t border-white/5 bg-black/80 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 italic">Preço final com taxas inclusas</p>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-red-600">
+                  <ShieldCheck size={14} /> Pagamento 100% Criptografado
+                </div>
               </div>
             </motion.div>
           </div>
@@ -549,15 +565,15 @@ export default function RenovePage() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-12 bg-black">
-        <div className="max-w-7xl mx-auto px-6 text-center space-y-6">
+      <footer className="border-t border-red-600/20 py-16 bg-[#050505]">
+        <div className="max-w-7xl mx-auto px-6 text-center space-y-8">
           <Logo />
-          <p className="text-[10px] text-gray-700 font-bold uppercase tracking-[0.5em]">RedFlix Renove © 2026 • Premium Experience</p>
-          <div className="flex items-center justify-center gap-8 text-[10px] font-black text-gray-600 uppercase tracking-widest">
-            <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
-            <a href="#" className="hover:text-primary transition-colors">Termos</a>
-            <a href="#" className="hover:text-primary transition-colors">Suporte</a>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 text-[11px] font-black text-gray-600 uppercase tracking-widest">
+            <a href="#" className="hover:text-red-600 transition-colors border-b border-transparent hover:border-red-600 pb-1">Privacidade</a>
+            <a href="#" className="hover:text-red-600 transition-colors border-b border-transparent hover:border-red-600 pb-1">Termos de Uso</a>
+            <a href="#" className="hover:text-red-600 transition-colors border-b border-transparent hover:border-red-600 pb-1">Suporte VIP</a>
           </div>
+          <p className="text-[9px] text-gray-800 font-bold uppercase tracking-[0.6em]">RedFlix Renove © 2026 • Premium Experience</p>
         </div>
       </footer>
     </div>

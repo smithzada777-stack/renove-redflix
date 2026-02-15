@@ -59,13 +59,17 @@ export const getEmailHtml = (content: string) => `
 export async function sendEmail({ email, plan, price, status, pixCode, origin = 'RedFlix' }: { email: string, plan: string, price: string, status: string, pixCode?: string, origin?: string }) {
     if (!process.env.RESEND_API_KEY) return { error: "API Key missing" };
 
-    // Notificar Admin (Adalmir) sobre a atividade
+    const cleanOrigin = origin || 'RedFlix';
+    const isRenove = cleanOrigin === 'renove';
+
+    // 1. Notificar Admin (Adalmir) sobre a atividade
     try {
-        await notifyAdmin({ email, plan, price, status, origin });
+        await notifyAdmin({ email, plan, price, status, origin: cleanOrigin });
     } catch (e) {
         console.error("Erro ao notificar admin:", e);
     }
 
+    // 2. Não enviar para emails anônimos
     if (email.toLowerCase().startsWith('anon.') || email.toLowerCase().includes('@redflix.com')) {
         return { data: { id: "skipped_anonymous" } };
     }
@@ -73,7 +77,6 @@ export async function sendEmail({ email, plan, price, status, pixCode, origin = 
     let subject = '';
     let innerContent = '';
     const supportPhone = '5571991644164';
-    const cleanOrigin = origin === 'painel-admin' ? 'RedFlix' : origin;
 
     if (status === 'approved') {
         subject = '✅ Seu acesso ao RedFlix está disponível';
@@ -99,7 +102,6 @@ export async function sendEmail({ email, plan, price, status, pixCode, origin = 
         `;
     } else {
         subject = '⏳ Pedido Pendente - RedFlix';
-        // Formantando o preço para ficar bonito na mensagem do WA
         const cleanPrice = price.toString().replace('.', ',');
         const waMsgPending = encodeURIComponent(`Olá, acabei de gerar o pedido da assinatura de R$ ${cleanPrice} na RedFlix e tenho dúvidas, poderia me ajudar?`);
 
@@ -122,7 +124,6 @@ export async function sendEmail({ email, plan, price, status, pixCode, origin = 
         `;
     }
 
-    const isRenove = origin === 'renove';
     const sender = isRenove ? 'Renove <renove@redflixoficial.site>' : 'RedFlix <suporte@redflixoficial.site>';
 
     try {

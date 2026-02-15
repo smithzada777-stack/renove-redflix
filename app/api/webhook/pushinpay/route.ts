@@ -79,7 +79,8 @@ export async function POST(req: Request) {
                                     email: leadData.email,
                                     plan: leadData.plan || 'Plano RedFlix',
                                     price: leadData.price || '0,00',
-                                    status: 'approved'
+                                    status: 'approved',
+                                    origin: leadData.origin || 'renove'
                                 });
                                 console.log(`[WEBHOOK] E-mail de aprovação enviado com sucesso para ${leadData.email}`);
                             } catch (emailErr: any) {
