@@ -186,7 +186,6 @@ export default function RenovePage() {
         </p>
       </div>
 
-      {/* Header Navigation */}
       <nav className="border-b border-white/5 bg-black/40 backdrop-blur-xl z-50">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           {step !== 'plans' ? (
@@ -201,26 +200,13 @@ export default function RenovePage() {
             </div>
           )}
 
-          <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-            {step !== 'plans' ? (
-              <button onClick={() => setStep('plans')} className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
-                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-white">Voltar</span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full border border-primary/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Sistema de Renovação</span>
-              </div>
-            )}
-
-            {step === 'plans' ? <Logo /> : (
-              <div className="flex flex-col items-end">
-                <span className="text-[12px] font-black italic text-primary uppercase tracking-tighter">RENOVAÇÃO VIP</span>
-                <span className="text-[7px] text-gray-600 font-bold uppercase tracking-[0.3em]">PROCESSO SEGURO</span>
-              </div>
-            )}
-          </div>
+          {step === 'plans' ? <Logo /> : (
+            <div className="flex flex-col items-end">
+              <span className="text-[12px] font-black italic text-primary uppercase tracking-tighter">RENOVAÇÃO VIP</span>
+              <span className="text-[7px] text-gray-600 font-bold uppercase tracking-[0.3em]">PROCESSO SEGURO</span>
+            </div>
+          )}
+        </div>
       </nav>
 
       <main className="max-w-6xl mx-auto px-4 py-12">
