@@ -68,7 +68,7 @@ const getDaysRemaining = (createdAt: Timestamp | null, plan: string) => {
 export default function RenoveDashboard() {
     // --- Security Config ---
     const ALLOWED_IP = process.env.NEXT_PUBLIC_ALLOWED_IP;
-    const SECRET_PASSWORD = 'renove123'; // Senha específica da Renove
+    const SECRET_PASSWORD = 'dviela123'; // Mesma senha da RedFlix
     const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
