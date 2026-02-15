@@ -6,60 +6,56 @@ function initializeAdmin() {
 
     try {
         const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
+        let credentials;
 
-        if (!serviceAccount) {
-            console.warn('[FIREBASE ADMIN] Variável FIREBASE_SERVICE_ACCOUNT não encontrada ou vazia.');
-            return null;
-        }
+        // Fallback robusto para parse de JSON (comum dar erro em Vercel/Netlify)
+        if (serviceAccount) {
+            const tryParse = (str: string) => {
+                try {
+                    let parsed = JSON.parse(str);
+                    if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+                    return parsed;
+                } catch (e) {
+                    return null;
+                }
+            };
 
-        // TENTATIVA 1: Parse Direto (Ideal para JSON colado corretamente)
-        try {
-            // Tenta limpar apenas espaços em branco nas pontas
-            const rawParams = JSON.parse(serviceAccount.trim());
-            console.log('[FIREBASE ADMIN] Credenciais carregadas via parse direto.');
-            return admin.initializeApp({
-                credential: admin.credential.cert(rawParams)
-            });
-        } catch (e1) {
-            console.log('[FIREBASE ADMIN] Falha no parse direto. Tentando limpeza de formatação avançada...');
-        }
+            credentials = tryParse(serviceAccount);
 
-        // TENTATIVA 2: Limpeza de aspas extras e formatação do Netlify
-        // Netlify às vezes escapa os \n literals no painel
-        try {
-            let cleanCreds = serviceAccount.toString().trim();
-
-            // Se o JSON estiver envelopado em aspas simples ou duplas, remove
-            if ((cleanCreds.startsWith('"') && cleanCreds.endsWith('"')) ||
-                (cleanCreds.startsWith("'") && cleanCreds.endsWith("'"))) {
-                cleanCreds = cleanCreds.slice(1, -1);
+            if (!credentials) {
+                const flattened = serviceAccount.replace(/\n/g, '').replace(/\r/g, '').trim();
+                credentials = tryParse(flattened);
             }
 
-            // Tenta lidar com quebras de linha escapadas
-            // Se o JSON tiver literalmente os caracteres \ e n, isso pode ser necessário
-            // Mas só aplicamos se o parse falhou antes.
-            if (cleanCreds.includes('\\n')) {
-                cleanCreds = cleanCreds.replace(/\\n/g, '\n');
+            if (!credentials) {
+                let clean = serviceAccount.trim();
+                if (clean.startsWith('"') && clean.endsWith('"')) clean = clean.slice(1, -1);
+                if (clean.startsWith("'") && clean.endsWith("'")) clean = clean.slice(1, -1);
+                credentials = tryParse(clean);
             }
-
-            const credentials = JSON.parse(cleanCreds);
-            console.log('[FIREBASE ADMIN] Credenciais carregadas após limpeza.');
-
-            return admin.initializeApp({
-                credential: admin.credential.cert(credentials)
-            });
-
-        } catch (error: any) {
-            console.error('[FIREBASE ADMIN] ERRO FATAL: Não foi possível ler as credenciais. Verifique o JSON no Netlify.', error.message);
-            return null;
         }
-    } catch (error) {
-        console.error('[FIREBASE ADMIN] Erro fatal na inicialização geral:', error);
+
+        if (credentials) {
+            if (credentials.private_key) {
+                credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+                console.log('[FIREBASE ADMIN] Inicializado com sucesso.');
+                return admin.initializeApp({
+                    credential: admin.credential.cert(credentials)
+                });
+            } else {
+                console.error('[FIREBASE ADMIN] Credenciais sem "private_key". Chaves:', Object.keys(credentials).join(', '));
+            }
+        } else {
+            console.warn('[FIREBASE ADMIN] Nenhuma credencial encontrada.');
+        }
+
+        return null;
+
+    } catch (error: any) {
+        console.error('[FIREBASE ADMIN] Erro fatal:', error.message);
         return null;
     }
 }
 
 const app = initializeAdmin();
-
-// Exporta o Firestore apenas se o app inicializou.
 export const adminDb = app ? app.firestore() : null as any;
