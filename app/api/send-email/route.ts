@@ -4,13 +4,13 @@ import { sendEmail } from '@/lib/email';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, plan, price, status = 'pending' } = body;
+        const { email, plan, price, status = 'pending', origin = 'renove' } = body;
 
         if (!email) {
             return NextResponse.json({ error: "Email missing" }, { status: 400 });
         }
 
-        const data = await sendEmail({ email, plan, price, status });
+        const data = await sendEmail({ email, plan, price, status, origin });
 
         if ('error' in data && data.error) {
             return NextResponse.json({ error: data.error }, { status: 400 });

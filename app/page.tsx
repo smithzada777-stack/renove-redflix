@@ -113,6 +113,25 @@ export default function RenovePage() {
         paidAt: new Date().toISOString()
       }).catch((err) => console.warn("Fallback update lead:", err));
     }
+    // 3. Envia email de aprovação (comprador + admin) - com flag pra evitar duplicata
+    if (formData.email && leadId) {
+      (async () => {
+        try {
+          const { getDoc } = await import('firebase/firestore');
+          const leadSnap = await getDoc(doc(db, "leads", leadId));
+          if (leadSnap.exists() && !leadSnap.data().emailSent) {
+            await axios.post('/api/send-email', {
+              email: formData.email,
+              plan: `${selectedPlan.period} (Renovação)`,
+              price: selectedPlan.price,
+              status: 'approved',
+              origin: 'renove'
+            });
+            updateDoc(doc(db, "leads", leadId), { emailSent: true }).catch(() => {});
+          }
+        } catch (err) { console.warn("Fallback send email:", err); }
+      })();
+    }
   }, [isPaid, pixData.id, leadId]);
 
   // Payment Monitoring - TRIPLE LAYER (copiado do checkout Redflix que funciona)
