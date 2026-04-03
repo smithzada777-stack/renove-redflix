@@ -89,6 +89,7 @@ export default function RenovePage() {
   const [loading, setLoading] = useState(false);
   const [pixData, setPixData] = useState({ code: '', image: '', id: '' });
   const [isPaid, setIsPaid] = useState(false);
+  const [leadId, setLeadId] = useState('');
   const [surpriseStep, setSurpriseStep] = useState(0);
 
   useEffect(() => {
@@ -99,15 +100,31 @@ export default function RenovePage() {
   }, []);
 
   useEffect(() => {
-    if (step === 'pix' && pixData.id) {
-      const unsub = onSnapshot(doc(db, "payments", pixData.id.toLowerCase()), (snap) => {
-        if (snap.exists() && ['paid', 'approved', 'concluido'].includes(snap.data().status?.toLowerCase())) {
+    if (step !== 'pix') return;
+    const unsubs: (() => void)[] = [];
+
+    // Monitor payments collection
+    if (pixData.id) {
+      const unsub1 = onSnapshot(doc(db, "payments", pixData.id.toLowerCase()), (snap) => {
+        if (snap.exists() && ['paid', 'approved', 'confirmed', 'concluido', 'sucesso', '1'].includes(snap.data().status?.toLowerCase())) {
           setIsPaid(true);
         }
       });
-      return () => unsub();
+      unsubs.push(unsub1);
     }
-  }, [step, pixData.id]);
+
+    // Monitor leads collection (more reliable - webhook sets to approved/renewed)
+    if (leadId) {
+      const unsub2 = onSnapshot(doc(db, "leads", leadId), (snap) => {
+        if (snap.exists() && ['approved', 'renewed'].includes(snap.data().status?.toLowerCase())) {
+          setIsPaid(true);
+        }
+      });
+      unsubs.push(unsub2);
+    }
+
+    return () => unsubs.forEach(u => u());
+  }, [step, pixData.id, leadId]);
 
   const handlePlanSelect = (plan: any) => {
     setSelectedPlan(plan);
@@ -132,6 +149,7 @@ export default function RenovePage() {
         origin: 'renove',
         createdAt: serverTimestamp()
       });
+      setLeadId(leadRef.id);
 
       const res = await axios.post('/api/payment', {
         amount: selectedPlan.price,
