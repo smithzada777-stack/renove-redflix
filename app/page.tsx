@@ -99,32 +99,76 @@ export default function RenovePage() {
     return () => clearInterval(timer);
   }, []);
 
+  // PAYMENT SUCCESS SYNC (quando front detecta, garante que banco saiba)
+  useEffect(() => {
+    if (isPaid && pixData.id) {
+      axios.get(`/api/check-status?id=${pixData.id}`).catch(() => {});
+    }
+  }, [isPaid, pixData.id]);
+
+  // Payment Monitoring - TRIPLE LAYER (copiado do checkout Redflix que funciona)
   useEffect(() => {
     if (step !== 'pix') return;
+
     const unsubs: (() => void)[] = [];
 
-    // Monitor payments collection
+    // 1. Monitoramento Direto da Transação (payments collection)
     if (pixData.id) {
-      const unsub1 = onSnapshot(doc(db, "payments", pixData.id.toLowerCase()), (snap) => {
-        if (snap.exists() && ['paid', 'approved', 'confirmed', 'concluido', 'sucesso', '1'].includes(snap.data().status?.toLowerCase())) {
-          setIsPaid(true);
+      const tid = pixData.id.toLowerCase();
+      const unsub1 = onSnapshot(doc(db, "payments", tid), (snap) => {
+        if (snap.exists()) {
+          const status = (snap.data().status || '').toLowerCase();
+          if (['paid', 'approved', 'confirmed', 'sucesso', 'concluido', 'pago'].includes(status)) {
+            setIsPaid(true);
+          }
         }
-      });
+      }, (error) => { console.error("Erro monitoramento payments:", error); });
       unsubs.push(unsub1);
     }
 
-    // Monitor leads collection (more reliable - webhook sets to approved/renewed)
+    // 2. Monitoramento do Lead (mais confiável - webhook seta approved/renewed)
     if (leadId) {
       const unsub2 = onSnapshot(doc(db, "leads", leadId), (snap) => {
-        if (snap.exists() && ['approved', 'renewed'].includes(snap.data().status?.toLowerCase())) {
-          setIsPaid(true);
+        if (snap.exists()) {
+          const status = (snap.data().status || '').toLowerCase();
+          if (['approved', 'renewed', 'paid', 'confirmed'].includes(status)) {
+            setIsPaid(true);
+          }
         }
-      });
+      }, (error) => { console.warn("Erro monitoramento lead:", error); });
       unsubs.push(unsub2);
     }
 
-    return () => unsubs.forEach(u => u());
-  }, [step, pixData.id, leadId]);
+    // 3. Monitoramento por email (fallback)
+    if (formData.email) {
+      const q = query(collection(db, "leads"), where("email", "==", formData.email), limit(5));
+      const unsub3 = onSnapshot(q, (snapshot) => {
+        snapshot.forEach((d) => {
+          const status = (d.data().status || '').toLowerCase();
+          if (['approved', 'renewed', 'paid', 'confirmed'].includes(status)) {
+            setIsPaid(true);
+          }
+        });
+      }, (error) => { console.warn("Erro monitoramento email:", error); });
+      unsubs.push(unsub3);
+    }
+
+    // 4. Polling de Segurança (a cada 1.5s consulta direto na API PushinPay)
+    const pollInterval = setInterval(async () => {
+      if (isPaid || !pixData.id) return;
+      try {
+        const response = await axios.get(`/api/check-status?id=${pixData.id}`);
+        if (response.data.paid || ['approved', 'paid', 'pago', 'confirmed'].includes(response.data.status)) {
+          setIsPaid(true);
+        }
+      } catch (e) { /* silencioso */ }
+    }, 1500);
+
+    return () => {
+      unsubs.forEach(u => u());
+      clearInterval(pollInterval);
+    };
+  }, [step, pixData.id, leadId, formData.email, isPaid]);
 
   const handlePlanSelect = (plan: any) => {
     setSelectedPlan(plan);
