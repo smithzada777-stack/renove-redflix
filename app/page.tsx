@@ -101,10 +101,19 @@ export default function RenovePage() {
 
   // PAYMENT SUCCESS SYNC (quando front detecta, garante que banco saiba)
   useEffect(() => {
-    if (isPaid && pixData.id) {
+    if (!isPaid) return;
+    // 1. Chama check-status pra garantir server-side
+    if (pixData.id) {
       axios.get(`/api/check-status?id=${pixData.id}`).catch(() => {});
     }
-  }, [isPaid, pixData.id]);
+    // 2. Fallback: atualiza lead direto do client (caso server falhe)
+    if (leadId) {
+      updateDoc(doc(db, "leads", leadId), {
+        status: 'renewed',
+        paidAt: new Date().toISOString()
+      }).catch((err) => console.warn("Fallback update lead:", err));
+    }
+  }, [isPaid, pixData.id, leadId]);
 
   // Payment Monitoring - TRIPLE LAYER (copiado do checkout Redflix que funciona)
   useEffect(() => {
